@@ -1,0 +1,17 @@
+
+services:
+  ansible-node:
+    image: ansible-node:latest
+    container_name: ansible-node
+    privileged: true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock  # allow Docker CLI inside container to control host Docker
+      - prometheus_metrics_data:/tmp/metrics  # shared volume with node_exporter for custom metrics
+    ports:
+      - "2222:22"
+    tty: true
+    restart: unless-stopped
+
+volumes:
+  prometheus_metrics_data:
+    external: true  # reference the same volume created by prometheus docker-compose

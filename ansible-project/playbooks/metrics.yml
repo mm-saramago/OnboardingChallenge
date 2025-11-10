@@ -1,0 +1,8 @@
+---
+- name: Deploy metrics stack
+  hosts: local_nodes
+  become: yes
+  roles:
+    - metrics_collector
+    - prometheus
+    - grafana

@@ -1,0 +1,6 @@
+---
+- name: Configure local_nodes
+  hosts: local_nodes
+  become: yes
+  roles:
+    - moon-buggy

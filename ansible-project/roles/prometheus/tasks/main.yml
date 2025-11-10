@@ -1,0 +1,22 @@
+---
+- name: Ensure Prometheus directory exists
+  file:
+    path: /opt/prometheus
+    state: directory
+    mode: '0755'
+
+- name: Copy Prometheus files (docker-compose.yml & prometheus.yml)
+  copy:
+    src: "{{ item }}"
+    dest: "/opt/prometheus/{{ item }}"
+    owner: root
+    group: root
+    mode: '0644'
+  loop:
+    - docker-compose.yml
+    - prometheus.yml
+
+- name: Start Prometheus container with Docker Compose v2
+  community.docker.docker_compose_v2:
+    project_src: /opt/prometheus
+    state: present

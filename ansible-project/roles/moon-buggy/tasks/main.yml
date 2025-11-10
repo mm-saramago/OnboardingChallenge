@@ -1,0 +1,6 @@
+---
+- name: Install moon-buggy game
+  apt:
+    name: "{{ package_name }}"
+    state: present
+    update_cache: yes
