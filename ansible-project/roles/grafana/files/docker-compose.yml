@@ -22,4 +22,4 @@ volumes:
 networks:
   monitoring:
     external: true
-    name: prometheus_monitoring
+    name: monitoring

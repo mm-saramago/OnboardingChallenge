@@ -15,6 +15,11 @@
     - provisioning
     - dashboards
 
+- name: Ensure monitoring network exists
+  shell: docker network create monitoring || true
+  register: network_result
+  changed_when: network_result.rc == 0
+
 - name: Start Grafana container
   community.docker.docker_compose_v2:
     project_src: /opt/grafana

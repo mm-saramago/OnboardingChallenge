@@ -16,7 +16,30 @@
     - docker-compose.yml
     - prometheus.yml
 
+- name: Ensure metrics directory exists
+  file:
+    path: /tmp/metrics
+    state: directory
+    mode: '0755'
+
+- name: Create monitoring network
+  shell: docker network create monitoring || true
+  register: network_result
+  changed_when: network_result.rc == 0
+
 - name: Start Prometheus container with Docker Compose v2
   community.docker.docker_compose_v2:
     project_src: /opt/prometheus
     state: present
+
+- name: Wait for Prometheus container to be running
+  wait_for:
+    timeout: 30
+    delay: 2
+
+- name: Copy custom prometheus.yml to running container
+  shell: docker cp /opt/prometheus/prometheus.yml prometheus:/etc/prometheus/prometheus.yml
+
+- name: Restart Prometheus to load new config
+  shell: docker restart prometheus
+
