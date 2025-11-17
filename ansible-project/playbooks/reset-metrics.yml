@@ -15,6 +15,12 @@
         docker rm grafana || true
       ignore_errors: yes
 
+    - name: Stop and remove Node-exporter container
+      shell: |
+        docker stop node-exporter || true
+        docker rm node-exporter || true
+      ignore_errors: yes
+
     - name: Remove Prometheus volumes and networks
       shell: |
         docker volume rm prometheus_prometheus_data || true
