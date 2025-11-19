@@ -2,6 +2,10 @@
 ---
 ## Milestone 1 - Ansible Setup
 
+### Project Architecture
+![Architecture Diagram](images/m1.png)
+
+
 ### Ansible Configuration
 
 #### ansible.cfg
