@@ -1,5 +1,9 @@
 # Linux VM Provisioning with Docker and Ansible
 
+### Project Architecture
+![Architecture Diagram](images/m0.png)
+
+
 This project demonstrates provisioning a Linux virtual machine using **Docker** and configuring it with **Ansible**. The main goal is to **learn Ansible** in a simple and controlled environment.
 
 ---
