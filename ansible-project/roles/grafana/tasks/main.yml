@@ -5,17 +5,50 @@
     state: directory
     mode: '0755'
 
-- name: Copy Grafana files
+- name: Copy Grafana docker-compose.yml
   copy:
-    src: "{{ item }}"
-    dest: "/opt/grafana/{{ item }}"
+    src: docker-compose.yml
+    dest: /opt/grafana/docker-compose.yml
+    mode: '0644'
+
+- name: Create provisioning directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  with_items:
+    - /opt/grafana/provisioning
+    - /opt/grafana/provisioning/datasources
+    - /opt/grafana/provisioning/dashboards
+    - /opt/grafana/dashboards
+
+- name: Copy provisioning files
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
     mode: '0644'
   with_items:
-    - docker-compose.yml
-    - provisioning
-    - dashboards
+    - { src: 'provisioning/datasources/datasource.yml', dest: '/opt/grafana/provisioning/datasources/datasource.yml' }
+    - { src: 'provisioning/dashboards/dashboard.yml', dest: '/opt/grafana/provisioning/dashboards/dashboard.yml' }
+    - { src: 'dashboards/system-metrics-dashboard.json', dest: '/opt/grafana/dashboards/system-metrics-dashboard.json' }
+
+- name: Ensure monitoring network exists
+  shell: docker network create monitoring || true
+  register: network_result
+  changed_when: network_result.rc == 0
 
 - name: Start Grafana container
   community.docker.docker_compose_v2:
     project_src: /opt/grafana
     state: present
+
+- name: Wait for Grafana container to be running
+  wait_for:
+    timeout: 30
+    delay: 2
+
+- name: Copy provisioning files to running container
+  shell: docker cp /opt/grafana/provisioning/. grafana:/etc/grafana/provisioning/
+
+- name: Restart Grafana to load provisioning
+  shell: docker restart grafana

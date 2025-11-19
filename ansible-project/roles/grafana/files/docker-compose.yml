@@ -5,8 +5,8 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./provisioning/provisioning:/etc/grafana/provisioning
-      - ./dashboards/dashboards:/var/lib/grafana/dashboards
+      - ./provisioning:/etc/grafana/provisioning
+      - ./dashboards:/var/lib/grafana/dashboards
       - grafana_data:/var/lib/grafana
     environment:
       - GF_SECURITY_ADMIN_USER=admin
@@ -22,4 +22,4 @@ volumes:
 networks:
   monitoring:
     external: true
-    name: prometheus_monitoring
+    name: monitoring

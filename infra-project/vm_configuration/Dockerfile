@@ -9,7 +9,8 @@ RUN apt update && \
         openssh-server \
         python3 python3-pip python3-apt \
         sudo git curl wget vim net-tools \
-        apt-transport-https ca-certificates lsb-release gnupg && \
+        apt-transport-https ca-certificates lsb-release gnupg \
+        cron && \
     mkdir /var/run/sshd && \
     echo 'root:root' | chpasswd && \
     sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
@@ -23,8 +24,12 @@ RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /
 
 RUN pip install --break-system-packages docker requests
 
+# Create startup script to run both SSH and cron
+RUN echo '#!/bin/bash\nservice cron start\n/usr/sbin/sshd -D' > /start.sh && \
+    chmod +x /start.sh
+
 # Expose SSH
 EXPOSE 22
 
-# Start SSH daemon
-CMD ["/usr/sbin/sshd", "-D"]
+# Start both cron and SSH daemon
+CMD ["/start.sh"]
