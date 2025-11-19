@@ -3,6 +3,10 @@
 
 ## Milestone 2 - Monitoring and Visualization
 
+### Project Architecture
+![Architecture Diagram](images/m2.png)
+
+
 ### Prepare docker image with new services
 
 In this new Milestone cronjob was needed to execute periodically metrics. The ubuntu docker images does not cronjob installed, so we need to pre-install it on the Dockerfile and also enable the service.
