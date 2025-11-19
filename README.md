@@ -1,5 +1,8 @@
 # Linux VM Provisioning with Docker and Ansible
 
+### m0 Architecture
+![Architecture Diagram](images/m0.png)
+
 This project demonstrates provisioning a Linux virtual machine using **Docker** and configuring it with **Ansible**. The main goal is to **learn Ansible** in a simple and controlled environment.
 
 ---
@@ -221,6 +224,9 @@ Once connected, VS Code will open a new window running inside the container envi
 ---
 ## Milestone 1 - Ansible Setup
 
+### m1 Architecture
+![Architecture Diagram](images/m1.png)
+
 ### Ansible Configuration
 
 #### ansible.cfg
@@ -332,6 +338,9 @@ The command should show that the moon-buggy package is successfully installed.
 
 ## Milestone 2 - Monitoring and Visualization
 
+### m2 Architecture
+![Architecture Diagram](images/m2.png)
+
 ### Prepare docker image with new services
 
 In this new Milestone cronjob was needed to execute periodically metrics. The ubuntu docker images does not cronjob installed, so we need to pre-install it on the Dockerfile and also enable the service.
@@ -391,10 +400,6 @@ The monitoring solution consists of:
 - **Node Exporter** for system metrics exposure
 - **Grafana** for data visualization and dashboards
 - **Automated deployment** via Ansible playbooks
-
-### Project Architecture
-
-![image.png](attachment:5452e500-aad9-4ab9-bdb7-9ada15b812cf:image.png)
 
 ### Metrics Collection Implementation
 
