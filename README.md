@@ -782,3 +782,9 @@ OnboardingChallenge/
 ```
 
 ---
+
+### Improvements on M2
+
+- Instead of deploying Grafana/Prometheus configuration after Grafana/Prometheus containers are running, mount a volume with the configurations in the docker-compose file;
+
+- Create the Monitoring network layer inside the docker-compose file, instead of creating it in the role;
