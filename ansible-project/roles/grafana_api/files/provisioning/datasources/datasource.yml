@@ -7,3 +7,7 @@ datasources:
     url: http://172.19.0.1:8000
     uid: time-api
     isDefault: true
+    jsonData:
+      httpHeaderName1: "Authorization"
+    secureJsonData:
+      httpHeaderValue1: "Bearer grafana-token"

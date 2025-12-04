@@ -31,7 +31,7 @@
 
 - name: Wait for API to be ready
   uri:
-    url: http://localhost:8000/metrics
+    url: http://localhost:8000/health
     method: GET
   register: api_health
   until: api_health.status == 200

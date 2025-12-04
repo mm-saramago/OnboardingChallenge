@@ -37,7 +37,7 @@
       retries: 30
       delay: 5
       with_items:
-        - { url: "http://localhost:{{ api_port }}/metrics", service: "Metrics API" }
+        - { url: "http://localhost:{{ api_port }}/health", service: "Metrics API" }
         - { url: "http://localhost:{{ grafana_port }}/api/health", service: "Grafana" }
 
     - name: Display deployment summary
@@ -46,11 +46,13 @@
           - "🚀 Complete deployment successful!"
           - ""
           - "📊 Metrics API: http://localhost:{{ api_port }}"
-          - "   └── Endpoint: http://localhost:{{ api_port }}/metrics"
+          - "   └── Authenticated Endpoint: http://localhost:{{ api_port }}/metrics"
+          - "   └── Health Check: http://localhost:{{ api_port }}/health"
+          - "   └── Bearer Token: grafana-token"
           - ""
           - "📈 Grafana Dashboard: http://localhost:{{ grafana_port }}"
           - "   └── Login: admin / admin"
           - "   └── Dashboard: Time Metrics Dashboard"
           - ""
-          - "✅ API is integrated with Grafana via JSON datasource plugin"
+          - "✅ API with Bearer token authentication"
           - "✅ Dashboard auto-provisioned and ready to use"
