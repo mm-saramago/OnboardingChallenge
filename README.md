@@ -785,7 +785,7 @@ OnboardingChallenge/
 
 ## Milestone 3: Python API with Grafana Dashboard Integration
 
-### m23Architecture
+### m3Architecture
 ![Architecture Diagram](images/m3.png)
 
 ### Project Structure
