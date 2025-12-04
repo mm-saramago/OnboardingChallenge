@@ -782,3 +782,261 @@ OnboardingChallenge/
 ```
 
 ---
+
+## Milestone 3: Python API with Grafana Dashboard Integration
+
+### m23Architecture
+![Architecture Diagram](images/m3.png)
+
+### Project Structure
+
+```
+ansible-project/
+├── playbooks/
+│   └── api-dashboard.yml          # Main deployment playbook
+├── roles/
+│   ├── simple_metrics_api/        # API deployment role
+│   │   ├── files/
+│   │   │   ├── main.py            # FastAPI application
+│   │   │   ├── requirements.txt   # Python dependencies
+│   │   │   ├── Dockerfile         # Container definition
+│   │   │   └── docker-compose.yml # Service orchestration
+│   │   └── tasks/
+│   │       └── main.yml           # Deployment tasks
+│   └── grafana_api/               # Grafana deployment role
+│       ├── files/
+│       │   ├── docker-compose.yml # Grafana container config
+│       │   ├── provisioning/
+│       │   │   ├── datasources/
+│       │   │   │   └── datasource.yml    # API datasource config
+│       │   │   └── dashboards/
+│       │   │       └── dashboard.yml     # Dashboard provider
+│       │   └── dashboards/
+│       │       └── time-metrics-dashboard.json # Dashboard definition
+│       └── tasks/
+│           └── main.yml           # Grafana deployment tasks
+└── inventory/
+    └── inventory.ini              # Ansible inventory
+```
+
+### Features Implemented
+
+#### ✅ Python FastAPI Application
+
+**File**: `roles/simple_metrics_api/files/main.py`
+
+- **Framework**: FastAPI with Uvicorn ASGI server
+- **Endpoints**:
+  - `GET /metrics` - Authenticated time metrics endpoint
+  - `GET /health` - Public health check endpoint
+- **Response Format**:
+  ```json
+  {
+    "timestamp_iso": "2025-12-04T15:30:45.123456",
+    "timestamp_unix": 1764862245,
+    "timestamp_readable": "2025-12-04 15:30:45",
+    "authenticated_user": "grafana"
+  }
+  ```
+
+#### ✅ Authentication Implementation (Advanced Feature)
+
+**Authentication Method**: Bearer Token Authentication
+
+- **Security**: HTTP Bearer token scheme
+- **Valid Token**: `grafana-token`
+- **Protected Endpoint**: `/metrics` requires authentication
+- **Public Endpoint**: `/health` accessible without authentication
+
+**Usage Example**:
+```bash
+# Authenticated request
+curl -H "Authorization: Bearer grafana-token" http://localhost:8000/metrics
+
+# Public endpoint
+curl http://localhost:8000/health
+```
+
+#### ✅ Containerization
+
+**Docker Configuration**:
+- **Base Image**: python:3.9-slim
+- **Port Exposure**: 8000
+- **Dependencies**: FastAPI, uvicorn
+- **Network**: Custom Docker network for inter-container communication
+
+**Key Files**:
+- `Dockerfile` - Container image definition
+- `docker-compose.yml` - Service orchestration
+- `requirements.txt` - Python dependencies
+
+#### ✅ Ansible Automation
+
+**Main Playbook**: `playbooks/api-dashboard.yml`
+
+**Deployment Process**:
+1. Docker installation verification
+2. Custom network creation (`metrics-network`)
+3. API container deployment
+4. Grafana container deployment with provisioning
+5. Service health checks
+6. Deployment summary
+
+**Roles**:
+- **simple_metrics_api**: Deploys authenticated API
+- **grafana_api**: Deploys Grafana with dashboard provisioning
+
+#### ✅ Grafana Dashboard Integration
+
+**Dashboard Features**:
+- **Three Panels**: ISO timestamp, readable timestamp, Unix timestamp
+- **Data Source**: marcusolsson-json-datasource plugin
+- **Authentication**: Bearer token integration
+- **Auto-refresh**: 5-second intervals
+- **Network**: Docker host IP connection for virtualized environments
+
+**JSON Datasource Plugin Importance**:
+The `marcusolsson-json-datasource` plugin is essential for this implementation because:
+- **API Integration**: Enables Grafana to directly consume RESTful JSON APIs
+- **Real-time Data**: Fetches live data from the FastAPI endpoint without intermediate storage
+- **Authentication Support**: Built-in support for Bearer token authentication
+- **JSONPath/JSONata**: Flexible data extraction using JSONPath or JSONata expressions
+- **No Database Required**: Eliminates the need for time-series databases like Prometheus for simple API data
+- **Lightweight Solution**: Perfect for monitoring APIs that already expose JSON metrics
+
+**Technical Implementation**:
+- **Datasource URL**: `http://172.19.0.1:8000` (Docker host IP)
+- **Authentication Header**: `Authorization: Bearer grafana-token`
+- **JSONPath Selectors**: `$.timestamp_iso`, `$.timestamp_readable`, `$.timestamp_unix`
+
+#### ✅ Dashboard Export and Provisioning
+
+**Exported Dashboard**: `roles/grafana_api/files/dashboards/time-metrics-dashboard.json`
+
+**Automated Provisioning**:
+- **Dashboard Provider**: File-based provisioning
+- **Datasource Configuration**: Automated with authentication
+- **Plugin Installation**: JSON datasource plugin auto-installed
+
+### Deployment Instructions
+
+#### Prerequisites
+- Docker installed on target system
+- Ansible installed
+- Network connectivity for container communication
+
+#### Quick Deployment
+```bash
+# Navigate to project directory
+cd ansible-project/
+
+# Run deployment playbook
+ansible-playbook -i inventory/inventory.ini playbooks/api-dashboard.yml
+```
+
+#### Verification
+```bash
+# Check API health
+curl http://localhost:8000/health
+
+# Test authenticated endpoint
+curl -H "Authorization: Bearer grafana-token" http://localhost:8000/metrics
+
+# Access Grafana dashboard
+# URL: http://localhost:3000
+# Login: admin / admin
+```
+
+### Network Architecture
+
+```
+┌─────────────────────────────────────────────────┐
+│                Docker Host                      │
+│  ┌─────────────────────┐  ┌─────────────────────┐│
+│  │   FastAPI Container │  │  Grafana Container  ││
+│  │   Port: 8000        │  │  Port: 3000         ││
+│  │   /metrics (auth)   │◄─│  JSON Datasource    ││
+│  │   /health (public)  │  │  Bearer Token Auth  ││
+│  └─────────────────────┘  └─────────────────────┘│
+│              ▲                        ▲          │
+└──────────────┼────────────────────────┼──────────┘
+               │                        │
+    ┌─────────────┐              ┌─────────────┐
+    │   API Calls │              │  Dashboard  │
+    │ (Bruno/     │              │   Access    │
+    │  curl)      │              │ (Browser)   │
+    └─────────────┘              └─────────────┘
+```
+
+### Advanced Features Implemented
+
+#### 🔐 Bearer Token Authentication
+- **Security Layer**: Protects sensitive metrics endpoint
+- **Token Management**: Configurable token validation
+- **Error Handling**: Proper HTTP 401 responses for unauthorized access
+- **Grafana Integration**: Seamless authentication with datasource
+
+#### 📊 Dashboard Automation
+- **Zero-Configuration**: Dashboard appears automatically after deployment
+- **Field Mapping**: Proper JSON field extraction and display
+- **Real-time Updates**: Live data refresh every 5 seconds
+- **Responsive Design**: Optimized panel layout
+
+#### 🐋 Container Orchestration
+- **Shared Networking**: Custom Docker network for service communication
+- **Health Monitoring**: Automated service readiness checks
+- **Volume Persistence**: Grafana data persistence across restarts
+
+### API Testing
+
+#### Authentication Testing
+```bash
+# Valid token - should return data
+curl -H "Authorization: Bearer grafana-token" \
+     http://localhost:8000/metrics
+
+# Invalid token - should return 401
+curl -H "Authorization: Bearer invalid-token" \
+     http://localhost:8000/metrics
+
+# No token - should return 401  
+curl http://localhost:8000/metrics
+```
+
+#### Postman Configuration
+1. **Method**: GET
+2. **URL**: `http://localhost:8000/metrics`
+3. **Authorization**: Bearer Token
+4. **Token**: `grafana-token`
+
+### Troubleshooting
+
+#### Common Issues
+
+**1. Dashboard Shows "No Data"**
+- Verify API container is running: `docker ps`
+- Test API connectivity: `curl http://localhost:8000/health`
+- Check Grafana logs: `docker logs grafana-api`
+
+**2. Authentication Errors**
+- Verify token in datasource configuration
+- Test manual API call with bearer token
+- Check API logs for authentication failures
+
+**3. Network Connectivity Issues**
+- Ensure Docker network exists: `docker network ls`
+- Verify containers are on same network: `docker network inspect metrics-network`
+- Use Docker host IP for datasource URL in virtualized environments
+
+### Conclusion
+
+This milestone successfully demonstrates a complete end-to-end monitoring solution with:
+- **Secure API** with Bearer token authentication
+- **Containerized architecture** for scalability
+- **Infrastructure as Code** with Ansible automation  
+- **Real-time visualization** with Grafana dashboards
+- **Production-ready deployment** with proper networking and security
+
+The implementation showcases modern DevOps practices including API security, container orchestration, and automated provisioning for a robust monitoring infrastructure.
+
+---
