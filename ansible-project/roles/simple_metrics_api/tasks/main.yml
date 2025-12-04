@@ -1,0 +1,45 @@
+---
+- name: Create metrics network
+  shell: docker network create metrics-network || true
+  register: network_result
+  changed_when: network_result.rc == 0
+
+- name: Create simple time API directory
+  file:
+    path: ~/simple-time-api
+    state: directory
+    mode: '0755'
+
+- name: Copy API source files
+  copy:
+    src: "{{ item }}"
+    dest: ~/simple-time-api/{{ item }}
+    mode: '0644'
+  loop:
+    - main.py
+    - requirements.txt
+    - Dockerfile
+    - docker-compose.yml
+
+- name: Build and start simple time API
+  shell: |
+    cd ~/simple-time-api
+    docker compose down || true
+    docker compose up -d --build
+  register: compose_result
+  changed_when: true
+
+- name: Wait for API to be ready
+  uri:
+    url: http://localhost:8000/metrics
+    method: GET
+  register: api_health
+  until: api_health.status == 200
+  retries: 30
+  delay: 2
+
+- name: Display deployment status
+  debug:
+    msg:
+      - "✅ Simple Time API deployed successfully"
+      - "📊 API available at: http://localhost:8000/metrics"

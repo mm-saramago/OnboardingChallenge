@@ -1,0 +1,13 @@
+services:
+  metrics-api:
+    build: .
+    container_name: simple-time-api
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    networks:
+      - metrics-network
+
+networks:
+  metrics-network:
+    external: true

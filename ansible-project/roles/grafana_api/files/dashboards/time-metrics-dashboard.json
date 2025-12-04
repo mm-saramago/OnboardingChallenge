@@ -1,0 +1,146 @@
+{
+  "id": null,
+  "title": "Time Metrics Dashboard",
+  "tags": ["time", "api"],
+  "timezone": "browser",
+  "panels": [
+    {
+      "id": 1,
+      "title": "Current Time (ISO)",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "time-api"
+          },
+          "refId": "A",
+          "cacheDurationSeconds": 0,
+          "fields": [
+            {
+              "jsonPath": "$.timestamp_iso",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "method": "GET",
+          "queryParams": "",
+          "urlPath": "/metrics"
+        }
+      ],
+      "gridPos": {"h": 4, "w": 8, "x": 0, "y": 0},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {"displayMode": "list", "orientation": "auto"},
+          "mappings": []
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["lastNotNull"],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      }
+    },
+    {
+      "id": 2,
+      "title": "Current Time (Readable)",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "time-api"
+          },
+          "refId": "A",
+          "cacheDurationSeconds": 0,
+          "fields": [
+            {
+              "jsonPath": "$.timestamp_readable",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "method": "GET",
+          "queryParams": "",
+          "urlPath": "/metrics"
+        }
+      ],
+      "gridPos": {"h": 4, "w": 8, "x": 8, "y": 0},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {"displayMode": "list", "orientation": "auto"},
+          "mappings": []
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["lastNotNull"],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      }
+    },
+    {
+      "id": 3,
+      "title": "Unix Timestamp",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "time-api"
+          },
+          "refId": "A",
+          "cacheDurationSeconds": 0,
+          "fields": [
+            {
+              "jsonPath": "$.timestamp_unix",
+              "name": "",
+              "type": "number"
+            }
+          ],
+          "method": "GET",
+          "queryParams": "",
+          "urlPath": "/metrics"
+        }
+      ],
+      "gridPos": {"h": 4, "w": 8, "x": 16, "y": 0},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "custom": {"displayMode": "list", "orientation": "auto"},
+          "mappings": []
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": ["lastNotNull"],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      }
+    }
+  ],
+  "time": {"from": "now-5m", "to": "now"},
+  "refresh": "5s",
+  "version": 1
+}

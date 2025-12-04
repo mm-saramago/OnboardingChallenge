@@ -1,0 +1,65 @@
+---
+- name: Create Grafana API directory
+  file:
+    path: ~/grafana-api
+    state: directory
+    mode: '0755'
+
+- name: Copy Grafana API docker-compose file
+  copy:
+    src: docker-compose.yml
+    dest: ~/grafana-api/docker-compose.yml
+    mode: '0644'
+
+- name: Create provisioning directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  with_items:
+    - ~/grafana-api/provisioning
+    - ~/grafana-api/provisioning/datasources
+    - ~/grafana-api/provisioning/dashboards
+    - ~/grafana-api/dashboards
+
+- name: Copy datasource configuration
+  copy:
+    src: provisioning/datasources/datasource.yml
+    dest: ~/grafana-api/provisioning/datasources/datasource.yml
+    mode: '0644'
+
+- name: Copy dashboard provisioning configuration
+  copy:
+    src: provisioning/dashboards/dashboard.yml
+    dest: ~/grafana-api/provisioning/dashboards/dashboard.yml
+    mode: '0644'
+
+- name: Copy time metrics dashboard
+  copy:
+    src: dashboards/time-metrics-dashboard.json
+    dest: ~/grafana-api/dashboards/time-metrics-dashboard.json
+    mode: '0644'
+
+- name: Start Grafana API service
+  shell: |
+    cd ~/grafana-api
+    docker compose down || true
+    docker compose up -d
+  register: grafana_result
+  changed_when: true
+
+- name: Wait for Grafana API to be ready
+  uri:
+    url: http://localhost:3000/api/health
+    method: GET
+  register: grafana_health
+  until: grafana_health.status == 200
+  retries: 30
+  delay: 5
+
+- name: Display Grafana API deployment status
+  debug:
+    msg:
+      - "✅ Grafana API deployed successfully"
+      - "🔍 Grafana available at: http://localhost:3000"
+      - "🔐 Login: admin/admin"

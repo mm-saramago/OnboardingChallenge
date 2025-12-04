@@ -1,15 +1,27 @@
 ---
-- name: Reset Grafana and Prometheus containers and volumes
+- name: Reset API, Grafana API, and monitoring containers and volumes
   hosts: local_nodes
   become: yes
   tasks:
-    - name: Stop and remove Prometheus container
+    - name: Stop and remove Simple Time API container
+      shell: |
+        docker stop simple-time-api || true
+        docker rm simple-time-api || true
+      ignore_errors: yes
+
+    - name: Stop and remove Grafana API container
+      shell: |
+        docker stop grafana-api || true
+        docker rm grafana-api || true
+      ignore_errors: yes
+
+    - name: Stop and remove legacy Prometheus container
       shell: |
         docker stop prometheus || true
         docker rm prometheus || true
       ignore_errors: yes
 
-    - name: Stop and remove Grafana container
+    - name: Stop and remove legacy Grafana container
       shell: |
         docker stop grafana || true
         docker rm grafana || true
@@ -21,16 +33,32 @@
         docker rm node-exporter || true
       ignore_errors: yes
 
-    - name: Remove Prometheus volumes and networks
+    - name: Remove API and Grafana API volumes and networks
+      shell: |
+        docker volume rm simple-time-api_default || true
+        docker volume rm grafana-api_grafana_data || true
+        docker network rm simple-time-api_default || true
+        docker network rm grafana-api_default || true
+      ignore_errors: yes
+
+    - name: Remove legacy Prometheus volumes and networks
       shell: |
         docker volume rm prometheus_prometheus_data || true
         docker network rm prometheus_default || true
       ignore_errors: yes
 
-    - name: Remove Grafana volumes and networks
+    - name: Remove legacy Grafana volumes and networks
       shell: |
         docker volume rm grafana_grafana_data || true
         docker network rm grafana_default || true
+      ignore_errors: yes
+
+    - name: Remove deployment directories
+      shell: |
+        rm -rf ~/simple-time-api || true
+        rm -rf ~/grafana-api || true
+        rm -rf /opt/grafana || true
+        rm -rf /opt/prometheus || true
       ignore_errors: yes
 
     - name: Clean up any orphaned containers and volumes
@@ -39,6 +67,17 @@
         docker volume prune -f
       ignore_errors: yes
 
+    - name: Display Docker status
+      debug:
+        msg:
+          - "🧹 Cleanup complete!"
+          - "✅ Removed Simple Time API containers and volumes"
+          - "✅ Removed Grafana API containers and volumes" 
+          - "✅ Removed legacy monitoring containers"
+          - "✅ Cleaned up deployment directories"
+          - ""
+          - "📊 Current Docker status:"
+        
     - name: Show remaining containers and volumes
       shell: |
         echo "=== Remaining containers ==="
@@ -47,6 +86,6 @@
         docker volume ls
       register: docker_status
 
-    - name: Display Docker status
+    - name: Display remaining Docker resources
       debug:
-        var: docker_status.stdout_lines
+        var: docker_status.stdout_linesd
